@@ -1,0 +1,166 @@
+<html><head><base href="https://websim.com/professional-todo-app/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProTask: Professional Todo List</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f0f4f8;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+  }
+  .container {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+  }
+  h1 {
+    text-align: center;
+    color: #2c3e50;
+  }
+  #task-form {
+    display: flex;
+    margin-bottom: 20px;
+  }
+  #task-input {
+    flex-grow: 1;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #bdc3c7;
+    border-radius: 4px 0 0 4px;
+  }
+  #add-task {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  #add-task:hover {
+    background-color: #2980b9;
+  }
+  #task-list {
+    list-style-type: none;
+    padding: 0;
+  }
+  .task-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background-color: #ecf0f1;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+  }
+  .task-item:hover {
+    background-color: #e0e6e8;
+  }
+  .task-text {
+    flex-grow: 1;
+    margin-right: 10px;
+  }
+  .delete-task {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  .delete-task:hover {
+    background-color: #c0392b;
+  }
+  .completed {
+    text-decoration: line-through;
+    opacity: 0.6;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>ProTask</h1>
+    <form id="task-form">
+      <input type="text" id="task-input" placeholder="Enter a new task" required>
+      <button type="submit" id="add-task">Add Task</button>
+    </form>
+    <ul id="task-list"></ul>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const taskForm = document.getElementById('task-form');
+      const taskInput = document.getElementById('task-input');
+      const taskList = document.getElementById('task-list');
+
+      // Load tasks from local storage
+      let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+      function saveTasks() {
+        localStorage.setItem('tasks', JSON.stringify(tasks));
+      }
+
+      function renderTasks() {
+        taskList.innerHTML = '';
+        tasks.forEach((task, index) => {
+          const li = document.createElement('li');
+          li.className = 'task-item';
+          li.innerHTML = `
+            <span class="task-text ${task.completed ? 'completed' : ''}">${task.text}</span>
+            <button class="delete-task" data-index="${index}">Delete</button>
+          `;
+          li.addEventListener('click', (e) => {
+            if (e.target.tagName !== 'BUTTON') {
+              toggleTaskCompletion(index);
+            }
+          });
+          taskList.appendChild(li);
+        });
+      }
+
+      function addTask(text) {
+        tasks.push({ text, completed: false });
+        saveTasks();
+        renderTasks();
+      }
+
+      function deleteTask(index) {
+        tasks.splice(index, 1);
+        saveTasks();
+        renderTasks();
+      }
+
+      function toggleTaskCompletion(index) {
+        tasks[index].completed = !tasks[index].completed;
+        saveTasks();
+        renderTasks();
+      }
+
+      taskForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const taskText = taskInput.value.trim();
+        if (taskText) {
+          addTask(taskText);
+          taskInput.value = '';
+        }
+      });
+
+      taskList.addEventListener('click', (e) => {
+        if (e.target.classList.contains('delete-task')) {
+          const index = parseInt(e.target.getAttribute('data-index'));
+          deleteTask(index);
+        }
+      });
+
+      // Initial render
+      renderTasks();
+    });
+  </script>
+</body></html>
